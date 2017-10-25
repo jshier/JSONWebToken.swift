@@ -1,17 +1,17 @@
-class CompactJSONEncoder: JSONEncoder {
-  override func encode<T : Encodable>(_ value: T) throws -> Data {
-    return try encodeString(value).data(using: .ascii) ?? Data()
+final class CompactJSONEncoder {
+  let encoder = JSONEncoder()
+  
+  func encode<T : Encodable>(_ value: T, using base64Encoding: Base64Encoding) throws -> Data {
+    return try encodeString(value, using: base64Encoding).data(using: .ascii) ?? Data()
   }
 
-  func encodeString<T: Encodable>(_ value: T) throws -> String {
-    return base64encode(try super.encode(value))
+  func encodeString<T: Encodable>(_ value: T, using base64Encoding: Base64Encoding) throws -> String {
+    return base64Encoding.encode(try encoder.encode(value))
   }
 
-  func encodeString(_ value: [String: Any]) -> String? {
-    if let data = try? JSONSerialization.data(withJSONObject: value) {
-      return base64encode(data)
-    }
+  func encodeString(_ value: [String: Any], using base64Encoding: Base64Encoding) -> String? {
+    guard let data = try? JSONSerialization.data(withJSONObject: value) else { return nil }
 
-    return nil
+    return base64Encoding.encode(data)
   }
 }

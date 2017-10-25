@@ -29,10 +29,10 @@ public enum Algorithm: CustomStringConvertible {
   }
 
   /// Sign a message using the algorithm
-  func sign(_ message: String) -> String {
-    func signHS(_ key: Data, algorithm: HMACAlgorithm) -> String {
-      let messageData = message.data(using: String.Encoding.utf8, allowLossyConversion: false)!
-      return base64encode(hmac(algorithm: algorithm, key: key, message: messageData))
+  func sign(_ message: String, using base64Encoding: Base64Encoding) -> String {
+    func signHS(_ key: Data, algorithm: HMACAlgorithm, using base64Encoding: Base64Encoding) -> String {
+      let messageData = message.data(using: .utf8)!
+      return base64Encoding.encode(hmac(algorithm: algorithm, key: key, message: messageData))
     }
 
     switch self {
@@ -40,18 +40,18 @@ public enum Algorithm: CustomStringConvertible {
       return ""
 
     case .hs256(let key):
-      return signHS(key, algorithm: .sha256)
+      return signHS(key, algorithm: .sha256, using: base64Encoding)
 
     case .hs384(let key):
-      return signHS(key, algorithm: .sha384)
+      return signHS(key, algorithm: .sha384, using: base64Encoding)
 
     case .hs512(let key):
-      return signHS(key, algorithm: .sha512)
+      return signHS(key, algorithm: .sha512, using: base64Encoding)
     }
   }
 
   /// Verify a signature for a message using the algorithm
-  func verify(_ message: String, signature: Data) -> Bool {
-    return sign(message) == base64encode(signature)
+  func verify(_ message: String, signature: Data, using base64Encoding: Base64Encoding) -> Bool {
+    return sign(message, using: base64Encoding) == base64Encoding.encode(signature)
   }
 }
